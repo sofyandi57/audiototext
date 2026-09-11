@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+
+# ffmpeg portable (dibundel manual oleh user, tidak untuk git - terlalu besar)
+ffmpeg-portable/
+
+# PyInstaller build artifacts (kalau nanti dibuatkan versi .exe)
+build/
+dist/
