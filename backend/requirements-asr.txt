@@ -1,0 +1,4 @@
+# Optional: speech recognition. Pulls ctranslate2 + onnxruntime (~150 MB of wheels).
+# Model weights are downloaded separately: python -m app.cli download-asr-model small
+-r requirements.txt
+faster-whisper>=1.0

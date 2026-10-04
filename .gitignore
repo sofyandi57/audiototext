@@ -1,10 +1,37 @@
 # Python
 __pycache__/
 *.pyc
+.venv/
+.pytest_cache/
 
-# ffmpeg portable (dibundel manual oleh user, tidak untuk git - terlalu besar)
+# Runtime data: uploads, generated audio, database. NEVER commit.
+data/
+*.sqlite3
+*.sqlite3-*
+uploads/
+*.mp3
+*.wav
+*.m4a
+*.mp4
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/test-results/
+frontend/playwright-report/
+*.tsbuildinfo
+next-env.d.ts
+
+# Legacy app artefacts
 ffmpeg-portable/
-
-# PyInstaller build artifacts (kalau nanti dibuatkan versi .exe)
 build/
 dist/
+
+# Evaluation outputs (may contain generated audio)
+eval-output/
