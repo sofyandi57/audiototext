@@ -35,3 +35,4 @@ dist/
 
 # Evaluation outputs (may contain generated audio)
 eval-output/
+frontend/.e2e/

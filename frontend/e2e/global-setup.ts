@@ -5,7 +5,7 @@ import path from "node:path";
 /** Generate the synthetic corpus (no real documents/recordings are used). */
 export default function globalSetup() {
   const root = path.resolve(__dirname, "..", "..");
-  const out = path.join(root, "frontend", "test-results", "fixtures");
+  const out = path.join(root, "frontend", ".e2e", "fixtures");
   fs.mkdirSync(out, { recursive: true });
   const python = process.env.PYTHON || path.join(root, ".venv", "bin", "python");
   execFileSync(python, ["-c", `

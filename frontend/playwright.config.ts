@@ -3,7 +3,7 @@ import path from "node:path";
 
 const PORT = Number(process.env.E2E_PORT || 8765);
 const root = path.resolve(__dirname, "..");
-const dataDir = path.join(root, "frontend", "test-results", "e2e-data");
+const dataDir = path.join(root, "frontend", ".e2e", "data");
 const python = process.env.PYTHON || path.join(root, ".venv", "bin", "python");
 
 export default defineConfig({

@@ -1,72 +1,113 @@
-# Audio/Video → Teks (Whisper)
+# Meeting Intelligence Indonesia
 
-Aplikasi Streamlit sederhana untuk transkripsi rekaman suara atau video menjadi
-teks, memakai [OpenAI Whisper](https://github.com/openai/whisper).
+Aplikasi web responsif (ramah Android) dengan dua modul, berjalan **di CPU tanpa GPU dan tanpa API berbayar**:
 
-Mendukung upload file: `wav`, `mp3`, `mp4`, `m4a`, `ogg`, `flac`, `aac`, `wma`,
-`avi`, `mov`, `mkv`, `webm`. Whisper mendekode semua format ini lewat ffmpeg,
-jadi format video juga otomatis diambil audionya lalu ditranskrip.
+1. **Meeting Intelligence** — unggah rekaman rapat (audio/video) → transkrip bertimestamp
+   Bahasa Indonesia → edit transkrip & label pembicara → ringkasan, keputusan, risiko,
+   pertanyaan terbuka, dan tindak lanjut yang **masing-masing tertaut ke timestamp sumbernya**.
+2. **PDF ke Audiobook** — unggah PDF → ekstraksi teks berurutan (bab, paragraf, OCR untuk
+   halaman pindaian) → tinjau & koreksi teks → audio Bahasa Indonesia per bab (MP3) →
+   putar, lanjutkan dari posisi terakhir, unduh per bab atau satu buku.
 
-## Cara menjalankan
+> Status jujur: lihat [docs/LIMITATIONS.md](docs/LIMITATIONS.md) dan
+> [docs/EVALUATION.md](docs/EVALUATION.md). Ringkasnya: alur PDF→audiobook teruji end-to-end;
+> pipeline transkripsi teruji dengan adapter ASR palsu, tetapi **transkripsi dengan model
+> Whisper asli belum dapat diuji di lingkungan pengembangan** (unduhan model diblokir).
+> Belum ada deployment publik yang terverifikasi.
 
-1. Pastikan Python 3.12 sudah terpasang.
-2. Pastikan **ffmpeg** sudah terpasang (lihat bagian di bawah).
-3. Double-click `jalankan.bat`.
-   - Pertama kali dijalankan, langkah install library (termasuk `torch`) bisa
-     memakan waktu beberapa menit karena ukurannya besar (~2 GB).
-   - Browser akan otomatis terbuka ke aplikasi Streamlit.
-4. Upload file audio/video, atur model & bahasa di sidebar, lalu klik
-   **Transkripsi**.
-5. Hasil bisa didownload sebagai `.txt` (teks polos) atau `.srt` (subtitle
-   dengan timestamp).
+## Struktur
 
-## Instalasi ffmpeg (wajib)
-
-Whisper memanggil `ffmpeg` sebagai program terpisah untuk membaca file
-audio/video, jadi ffmpeg harus tersedia di komputer. Ada dua cara:
-
-**Cara 1 — pakai winget (paling gampang):**
-
-```bash
-winget install ffmpeg
+```
+backend/    FastAPI + worker + pipeline (Python)   → tests/ (pytest)
+frontend/   Next.js (static export, TypeScript)   → e2e/ (Playwright, emulasi Android)
+docs/       ARCHITECTURE.md, LIMITATIONS.md, EVALUATION.md
+legacy/     aplikasi Streamlit lama (tidak dipakai lagi)
+Dockerfile, docker-compose.yml, .env.example
 ```
 
-Lalu restart terminal/`jalankan.bat` supaya PATH ter-refresh.
+## Menjalankan secara lokal (Linux/macOS/WSL)
 
-**Cara 2 — portable, tanpa install:**
+Prasyarat: Python 3.11+, Node 20+, `ffmpeg`, `espeak-ng`; opsional `tesseract-ocr` +
+`tesseract-ocr-ind` untuk OCR.
 
-1. Download build ffmpeg untuk Windows dari
-   [gyan.dev/ffmpeg/builds](https://www.gyan.dev/ffmpeg/builds/) (pilih
-   "essentials build", format zip).
-2. Extract, lalu salin folder `bin` (isinya `ffmpeg.exe`, dll) ke dalam folder
-   aplikasi ini dengan nama `ffmpeg-portable`, sehingga strukturnya:
-   `audio-to-text-app/ffmpeg-portable/ffmpeg.exe`.
-3. Aplikasi otomatis mendeteksi folder ini tanpa perlu setting PATH manual.
+```bash
+# Ubuntu/Debian
+sudo apt install ffmpeg espeak-ng tesseract-ocr tesseract-ocr-ind
 
-Kalau ffmpeg belum ditemukan, aplikasi akan menampilkan pesan error di bagian
-atas halaman dan tombol Transkripsi akan dinonaktifkan.
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r backend/requirements-dev.txt
+pip install -r backend/requirements-asr.txt          # opsional: transkripsi
 
-## Tentang model Whisper
+(cd frontend && npm ci && npm run build)             # menghasilkan frontend/out
 
-- Model dipilih di sidebar: `tiny`, `base`, `small`, `medium`, `large-v3`.
-  Makin besar makin akurat tapi makin lambat & makin besar pemakaian RAM.
-  Untuk PC tanpa GPU, `base` atau `small` biasanya sudah cukup baik dan masih
-  cepat.
-- Model diunduh otomatis dari server OpenAI saat pertama kali dipakai (butuh
-  internet), lalu disimpan di cache lokal (`~/.cache/whisper`) sehingga
-  pemakaian berikutnya tidak perlu unduh ulang meskipun sedang offline.
-- Ada opsi "Terjemahkan ke Bahasa Inggris" di sidebar — kalau dicentang, hasil
-  transkrip langsung diterjemahkan ke Inggris (fitur bawaan Whisper), bukan
-  hanya ditranskrip di bahasa aslinya.
+cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000
+# buka http://localhost:8000   (dokumentasi API: /api/docs)
+```
 
-## Catatan
+Model transkripsi **tidak** diunduh otomatis saat ada permintaan (agar request tidak macet).
+Unduh sekali saat ada internet:
 
-- Aplikasi ini belum dibundel jadi `.exe` portable (seperti
-  `pdf-to-markdown-app`) karena `torch` + model Whisper ukurannya besar,
-  sehingga hasil bundling akan sangat besar. Cara menjalankan yang
-  direkomendasikan adalah lewat `jalankan.bat` dengan Python terpasang.
-- Proses transkripsi berjalan di CPU secara default. Untuk mempercepat di PC
-  dengan GPU NVIDIA, install `torch` versi CUDA sesuai
-  [panduan resmi PyTorch](https://pytorch.org/get-started/locally/) sebelum
-  menjalankan `jalankan.bat` (atau jalankan `pip install` manual dengan index
-  URL CUDA-nya).
+```bash
+cd backend && python -m app.cli download-asr-model small   # tiny/base/small/medium
+python -m app.cli capabilities                              # cek mesin yang tersedia
+```
+
+Mode pengembangan frontend (hot reload, `/api` diproksi ke backend :8000):
+`cd frontend && npm run dev` → http://localhost:3000
+
+## Menjalankan di Android
+
+**Sebagai klien:** cukup buka URL server (mis. `http://IP-laptop:8000` di Wi-Fi yang sama)
+di Chrome Android. UI dirancang mobile-first: navigasi bawah, target sentuh ≥44 px, pemutar
+audio native dengan kontrol kecepatan, posisi dengar tersimpan.
+
+**Sebagai server di HP (Termux, eksperimental, belum diuji di perangkat nyata):**
+
+```bash
+pkg install python nodejs ffmpeg espeak tesseract git
+git clone <repo> && cd audiototext
+pip install -r backend/requirements.txt     # PyMuPDF di Termux mungkin perlu dikompilasi
+(cd frontend && npm ci && npm run build)
+cd backend && uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Modul PDF→audiobook ringan (≈100 MB RAM). Transkripsi Whisper di HP akan lambat;
+model `tiny`/`base` lebih realistis. `faster-whisper` mungkin tidak punya wheel untuk Termux.
+
+## Docker
+
+```bash
+docker build -t meeting-intel .                         # tanpa ASR
+docker build -t meeting-intel --build-arg WITH_ASR=1 .  # dengan faster-whisper
+docker run -p 8000:8000 -v mi-data:/data meeting-intel
+
+docker compose up --build        # API dan worker sebagai container terpisah
+docker compose run --rm worker python -m app.cli download-asr-model small
+```
+
+Di balik proxy yang memeriksa TLS: tambahkan
+`--secret id=ca_bundle,src=/path/ca.crt` saat `docker build`.
+
+## Konfigurasi
+
+Semua lewat variabel lingkungan `MI_*` — lihat [.env.example](.env.example). Penting untuk URL
+publik: set **`MI_ACCESS_TOKEN`** (lalu masuk lewat halaman Settings). File unggahan tidak pernah
+disajikan sebagai file statis; hanya lewat API, dan dihapus otomatis setelah
+`MI_RETENTION_DAYS` (default 30) atau saat pengguna menghapusnya.
+
+## Pengujian
+
+```bash
+cd backend && python -m pytest                       # 86 tes unit + integrasi
+cd frontend && npx playwright test                    # 18 tes e2e (Pixel 7 + desktop)
+cd backend && python scripts/evaluate.py              # metrik → eval-output/results.json
+```
+
+Korpus uji sepenuhnya sintetis (dibuat oleh `backend/tests/corpus.py`); jangan pernah
+menggunakan rekaman rapat rahasia untuk pengujian di layanan publik.
+
+## Lisensi komponen
+
+FastAPI (MIT), PyMuPDF (AGPL-3.0 atau komersial — perhatikan bila mendistribusikan sebagai
+layanan tertutup), faster-whisper & bobot Whisper (MIT), eSpeak NG (GPL-3.0, dipanggil sebagai
+program terpisah), Tesseract (Apache-2.0), FFmpeg (LGPL/GPL tergantung build), Next.js (MIT).

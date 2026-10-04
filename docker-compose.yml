@@ -1,0 +1,35 @@
+# API and worker as separate containers sharing one data volume.
+#   docker compose up --build
+#   docker compose run --rm worker python -m app.cli download-asr-model small   # needs internet
+services:
+  api:
+    build:
+      context: .
+      args:
+        WITH_ASR: "${WITH_ASR:-0}"
+    image: meeting-intel:local
+    ports:
+      - "8000:8000"
+    environment:
+      MI_RUN_WORKER_IN_PROCESS: "false"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - data:/data
+    restart: unless-stopped
+
+  worker:
+    image: meeting-intel:local
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - data:/data
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  data:

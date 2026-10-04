@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 
-const FIX = path.resolve(__dirname, "..", "test-results", "fixtures");
+const FIX = path.resolve(__dirname, "..", ".e2e", "fixtures");
 
 test("PDF upload -> review -> edit -> generate audio -> play -> download (mobile)", async ({ page, request }) => {
   await page.goto("/audiobooks/");

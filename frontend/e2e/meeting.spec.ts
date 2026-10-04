@@ -3,8 +3,8 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const ROOT = path.resolve(__dirname, "..", "..");
-const FIX = path.join(ROOT, "frontend", "test-results", "fixtures");
-const DATA = path.join(ROOT, "frontend", "test-results", "e2e-data");
+const FIX = path.join(ROOT, "frontend", ".e2e", "fixtures");
+const DATA = path.join(ROOT, "frontend", ".e2e", "data");
 const PY = process.env.PYTHON || path.join(ROOT, ".venv", "bin", "python");
 
 test("meeting upload shows explicit ASR state; transcript editing and timestamps work (mobile)", async ({ page }) => {
