@@ -30,7 +30,7 @@ diucapkan sebagai banyak kata dan jeda kalimat; ini bukan kecepatan bicara seben
   pindaian, header/footer, PDF kosong/rusak/terenkripsi, validasi & konversi audio/video,
   timestamp antar-potongan, retry & pemulihan job, resume parsial, edit label pembicara,
   provenance item aksi, keluaran TTS & validitas MP3, kontrol akses, traversal path, retensi & hapus.
-- `frontend`: 18 tes Playwright lulus — emulasi Pixel 7 (Chromium) + desktop: tanpa overflow
+- `frontend`: 21 tes Playwright lulus (termasuk PWA: manifest, ikon, service worker tanpa cache /api, halaman offline) — emulasi Pixel 7 (Chromium) + desktop: tanpa overflow
   horizontal, target sentuh ≥44 px, alur PDF→edit→audio→putar→kecepatan→unduh, posisi pemutar di
   atas navigasi, penyimpanan progres, edit transkrip/pembicara, seek dari timestamp, provenance di UI.
   Ini emulasi, **bukan** perangkat Android fisik.

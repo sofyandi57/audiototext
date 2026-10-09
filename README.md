@@ -39,6 +39,7 @@ pip install -r backend/requirements-dev.txt
 pip install -r backend/requirements-asr.txt          # opsional: transkripsi
 
 (cd frontend && npm ci && npm run build)             # menghasilkan frontend/out
+# atau satu perintah: ./scripts/run-local.sh [--asr]
 
 cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000
 # buka http://localhost:8000   (dokumentasi API: /api/docs)
@@ -56,6 +57,11 @@ Mode pengembangan frontend (hot reload, `/api` diproksi ke backend :8000):
 `cd frontend && npm run dev` → http://localhost:3000
 
 ## Menjalankan di Android
+
+Panduan lengkap (Samsung S23 Ultra, pemasangan PWA, USB/Wi-Fi): [docs/ANDROID.md](docs/ANDROID.md).
+Cara tercepat di Mac/Linux: `./scripts/run-local.sh` lalu buka alamat yang dicetak dari HP.
+
+Ringkasnya:
 
 **Sebagai klien:** cukup buka URL server (mis. `http://IP-laptop:8000` di Wi-Fi yang sama)
 di Chrome Android. UI dirancang mobile-first: navigasi bawah, target sentuh ≥44 px, pemutar
@@ -99,7 +105,7 @@ disajikan sebagai file statis; hanya lewat API, dan dihapus otomatis setelah
 
 ```bash
 cd backend && python -m pytest                       # 86 tes unit + integrasi
-cd frontend && npx playwright test                    # 18 tes e2e (Pixel 7 + desktop)
+cd frontend && npx playwright test                    # 21 tes e2e (Pixel 7 + desktop, termasuk PWA)
 cd backend && python scripts/evaluate.py              # metrik → eval-output/results.json
 ```
 

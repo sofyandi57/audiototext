@@ -10,7 +10,8 @@
 | Piper TTS | Adapter saja | Belum ada suara Indonesia Piper yang terverifikasi (lisensi & kualitas). |
 | Analisis via Ollama/LLM lokal | Adapter saja | Diuji hanya dengan respons tiruan. |
 | Deployment publik | **Tidak ada** | Belum ada URL publik yang diverifikasi. |
-| Termux / Android sebagai server | Belum diuji di perangkat | Instruksi bersifat best-effort. |
+| Termux / Android sebagai server | Belum diuji di perangkat | Transkripsi di HP kemungkinan tidak bisa (ctranslate2 tanpa paket Android). |
+| Pemasangan PWA di S23 Ultra fisik | Belum diuji | Manifest, ikon, service worker diuji di Chromium emulasi saja. |
 
 ## Performa CPU
 

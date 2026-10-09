@@ -26,7 +26,10 @@ test("PDF upload -> review -> edit -> generate audio -> play -> download (mobile
   await expect(page.getByTestId("cleaning-report")).toContainText("Header berulang");
   await page.getByRole("tab", { name: "Pratinjau PDF" }).click();
   await expect(page.locator("img.page-preview")).toBeVisible();
-  expect(await page.locator("img.page-preview").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+  // lazy-loaded image: wait for the decode instead of reading the size immediately
+  await expect
+    .poll(() => page.locator("img.page-preview").evaluate((img: HTMLImageElement) => (img.complete ? img.naturalWidth : 0)))
+    .toBeGreaterThan(100);
   await page.getByRole("tab", { name: "Bab & teks" }).click();
 
   await page.getByTestId("generate-all").click();
